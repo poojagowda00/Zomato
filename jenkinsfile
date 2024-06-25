@@ -21,15 +21,15 @@ pipeline{
         stage("Sonarqube Analysis "){
             steps{
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=zomato \
-                    -Dsonar.projectKey=zomato '''
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Zomato \
+                    -Dsonar.projectKey=Zomato '''
                 }
             }
         }
         stage("quality gate"){
            steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token' 
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-scanner' 
                 }
             } 
         }
@@ -53,21 +53,21 @@ pipeline{
             steps{
                 script{
                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
-                       sh "docker build -t zomatoo ."
-                       sh "docker tag zomato poojagowda05/zomatoo:latest "
-                       sh "docker push poojagowda05/zomatoo:latest "
+                       sh "docker build -t zomato ."
+                       sh "docker tag zomato poojagowda05/zomato:latest "
+                       sh "docker push poojagowda05/zomato:latest "
                     }
                 }
             }
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image poojagowda05/zomatoo:latest > trivy.txt" 
+                sh "trivy image poojagowda05/zomato:latest > trivy.txt" 
             }
         }
         stage('Deploy to container'){
             steps{
-                sh 'docker run -d --name zomato1 -p 3000:3000 poojagowda05/zomatoo:latest'
+                sh 'docker run -d --name zomato -p 3000:3000 poojagowda05/zomato:latest'
             }
         }
     }
